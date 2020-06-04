@@ -7,6 +7,7 @@
 
 #include "avl.h"
 #include "artist.h"
+#include <iostream>
 
 class HashTable{
 private:
@@ -18,7 +19,7 @@ private:
     void increaseSize();
     void decreaseSize();
     void deleteArr();
-    int hash(int artistID, int arrSize);
+    static int hash(int artistID, int arrSize);
 
 public:
     explicit HashTable();
@@ -28,14 +29,47 @@ public:
     void addArtist(int artistID);
     void removeArtist(int artistID);
     Artist* findArtist(int artistID);
+    friend class ArtistPredicate;
+
 };
-//void addToArr(int index, int server_id, int DC_id, ChainNode** arr);
 
 void HashTable::initArr(Avl<int,Artist>** array, int size){
     for(int i=0; i<size; i++){
         array[i] = new Avl<int,Artist>;
     }
 }
+
+class ArtistPredicate{
+private:
+    Avl<int,Artist>** table;
+    int size;
+public:
+    void operator()(Node<int,Artist>* artistNode){
+        int artistID = artistNode->getData()->getArtistID();
+        int newIndex = HashTable::hash(artistID,size);
+        table[newIndex]->insert(artistID,artistNode->getData());
+    }
+    explicit ArtistPredicate(Avl<int,Artist>** table, int size) : table(table), size(size){};
+    ArtistPredicate(const ArtistPredicate& a) = delete;
+};
+
+void HashTable::increaseSize(){
+    int newSize = (this->arrSize)*2;
+    Avl<int,Artist>** newTable = new Avl<int,Artist>*[newSize]();
+    initArr(newTable,newSize);
+    /* For each artist in the Hash table, iterate over it's songs tree, and delete all the song from the tree nodes */
+    for(int i = 0; i< this->arrSize; i++){
+        // get the root of artist tree of the current cell of the table
+        Node<int,Artist>* artistNode = this->arr[i]->getRoot();
+
+        // do postorder to free data (song) for each artist
+        ArtistPredicate artistPredicate(newTable,newSize);
+
+        postorder<int,Artist,ArtistPredicate>(artistNode,artistPredicate);
+
+    }
+};
+
 
 
 class ArtistPredicate{
