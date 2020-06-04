@@ -47,6 +47,9 @@ public:
         return this->root;
     }
     bool isEmpty();
+
+    Node<K,D>* getMaxNode();
+
     class Error{};
     class KeyExists{};
     class KeyNotFound{};
@@ -408,6 +411,17 @@ Avl<K,D>::~Avl(){
 template <class K, class D>
 bool Avl<K,D>::isEmpty(){
     return this->root == nullptr;
+}
+
+template <class K, class D>
+Node<K,D>* Avl<K,D>::getMaxNode(){
+    Node<K,D>* current = this->getRoot();
+    Node<K,D>* prev = current;
+    while(current != nullptr){
+        prev = current;
+        current = current->getRight();
+    }
+    return prev;
 }
 
 

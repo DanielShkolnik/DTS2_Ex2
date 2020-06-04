@@ -140,6 +140,7 @@ public:
     }
 
     /* Remove Song - Dont forget to delete data */
+    //Remember not Delete song before this function
     StatusType RemoveSong(int artistID, int songID){
         try {
             // find artist in table

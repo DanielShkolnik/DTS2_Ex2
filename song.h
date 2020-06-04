@@ -5,8 +5,6 @@
 #ifndef DTS2_EX1_SONG_H
 #define DTS2_EX1_SONG_H
 
-//#include "disc.h"
-class Disc;
 
 class Song{
 private:
