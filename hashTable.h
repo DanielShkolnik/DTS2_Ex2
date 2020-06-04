@@ -171,7 +171,6 @@ void HashTable::addArtist(Artist* artist){
  * Remove artist from the tree at the adequate index of the hash table.
  */
 void HashTable::removeArtist(int artistID){
-    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGIC_SIZE){
     /* Check if only quarter of the table is at use. If so, decrease table size to half it's size
      * Else, Do nothing.
      */
@@ -184,7 +183,7 @@ void HashTable::removeArtist(int artistID){
 
     // remove artist from the tree at the appropriate cell at the table
     this->arr[index]->deleteVertice(artistID);
-}
+};
 
 
 Artist* HashTable::findArtist(int artistID){
