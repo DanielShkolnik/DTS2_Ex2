@@ -20,6 +20,7 @@ private:
     void decreaseSize();
     void deleteArr();
     static int hash(int artistID, int arrSize);
+    friend class ArtistPredicate;
 
 public:
     explicit HashTable();
@@ -29,7 +30,6 @@ public:
     void addArtist(int artistID);
     void removeArtist(int artistID);
     Artist* findArtist(int artistID);
-    friend class ArtistPredicate;
 
 };
 
@@ -46,8 +46,8 @@ private:
 public:
     void operator()(Node<int,Artist>* artistNode){
         int artistID = artistNode->getData()->getArtistID();
-        int newIndex = HashTable::hash(artistID,size);
-        table[newIndex]->insert(artistID,artistNode->getData());
+        int newIndex = HashTable::hash(artistID,this->size);
+        this->table[newIndex]->insert(artistID,artistNode->getData());
     }
     explicit ArtistPredicate(Avl<int,Artist>** table, int size) : table(table), size(size){};
     ArtistPredicate(const ArtistPredicate& a) = delete;
@@ -66,29 +66,11 @@ void HashTable::increaseSize(){
         ArtistPredicate artistPredicate(newTable,newSize);
 
         postorder<int,Artist,ArtistPredicate>(artistNode,artistPredicate);
-
     }
+    this->deleteArr();
+    this->arrSize = newSize;
+    this->arr = newTable;
 };
-
-
-
-class ArtistPredicate{
-public:
-    void operator()(Node<int,Artist>* artistNode){
-        // get the root of song tree of the current artist
-        Node<int,Song>* songNode = artistNode->getData();
-
-        // do postorder to free data (song) in each node
-        SongPredicate songDelete;
-
-        postorder<int,Song,SongPredicate>(songNode,songDelete);
-    }
-    explicit ArtistPredicate() = default;
-    ArtistPredicate(const ArtistPredicate& a) = delete;
-};
-
-
-
 
 void HashTable::decreaseSize(){
     int prevSize = this->arrSize;
@@ -98,15 +80,18 @@ void HashTable::decreaseSize(){
     for(int i=0; i<prevSize; i++){
         Node<int,Artist>* artistNode = this->arr[i]->getRoot();
 
-        ArtistPredicate artistPredicate;
+        ArtistPredicate artistPredicate(newArr,newSize);
 
         postorder<int,Artist,ArtistPredicate>(artistNode,artistPredicate);
     }
-    delete[] this->arr;
-    this->size = new_size;
+    this->deleteArr();
+    this->arrSize = newSize;
     this->arr = newArr;
 };
 
+int HashTable::hash(int artistID, int arrSize){
+    return artistID%arrSize;
+}
 
 
 #endif //DTS2_EX2_HASHTABLE_H
