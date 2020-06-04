@@ -97,5 +97,17 @@ HashTable::~HashTable(){
     this->deleteArr();
 }
 
+void HashTable::removeArtist(int artistID){
+    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGICSIZE){
+        this->decreaseSize();
+    }
+    int index = this->hash(artistID,this->arrSize);
+    this->arr[index]->deleteVertice(artistID);
+}
+
+Artist* HashTable::findArtist(int artistID){
+    int index = this->hash(artistID,this->arrSize);
+    return this->arr[index]->find(artistID)->getData();
+}
 
 #endif //DTS2_EX2_HASHTABLE_H
