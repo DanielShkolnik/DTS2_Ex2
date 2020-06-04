@@ -12,24 +12,23 @@
 #include "exception"
 #include "library2.h"
 #include "keyBestHitsTree.h"
+#include "hashtable.h"
 #include <iostream>
 
 class MusicManager{
 private:
 Avl<int,Song>* bestHitsTree;
-Hash<int,AVL<int,Artist>>* artistTable;
+HashTable artistHashTable;
+int totalSongs;
 
 public:
-    MusicManager(){
-        // init hash table of size 2 in O(1)
-        this->bestHitsTree = new Avl<int,Song>();
-    }
+    MusicManager(): bestHitsTree(new Avl<int,Song>), artistHashTable() {};
 
-    /* Function used by MusicManager destructor to iterate over disc tree and delete all of it's nodes */
+    /* Function used by MusicManager destructor to iterate over song tree and delete all of the data stored in the nodes */
     class SongPredicate{
     public:
         void operator()(Node<int,Song>* songNode){
-            // delete disc
+            // delete song
             delete songNode->getData();
         }
         explicit SongPredicate() = default;
@@ -41,7 +40,7 @@ public:
     public:
         void operator()(Node<int,Artist>* artistNode){
             // get the root of song tree of the current artist
-            Node<int,Song>* songNode = artistNode->getData()->getSongRoot();
+            Node<int,Song>* songNode = artistNode->getData()->getRootInSongTreeByID();
 
             // do postorder to free data (song) in each node
             SongPredicate songDelete;
@@ -54,9 +53,9 @@ public:
 
     ~MusicManager(){
         /* For each artist in the Hash table, iterate over it's songs tree, and delete all the song from the tree nodes */
-        for(int i = 0; i<this->artistTable->getTableSize; i++){
+        for(int i = 0; i<artistHashTable.getTableSize(); i++){
             // get the root of artist tree of the current cell of the table
-            Node<int,Artist>* artistNode = artistTable[i]->getRoot;
+            Node<int,Artist>* artistNode = this->artistHashTable.getArray()[i]->getRoot();
 
             // do postorder to free data (song) for each artist
             ArtistPredicate artistPredicate;
@@ -77,7 +76,7 @@ public:
      *                FAILURE: in case artist already exists.
      * */
     StatusType AddArtist(int artistID, int numOfSongs){
-        if(artistID<=0 || numOfSongs<=0){
+        if(artistID<=0){
             return INVALID_INPUT;
         }
         Artist* artist;
@@ -87,7 +86,7 @@ public:
             Artist* artist = new Artist(artistID);
 
             // insert into table
-            this->artistTable->insertTable(artistID,artist);
+            this->artistHashTable->insertTable(artistID,artist);
 
             return SUCCESS;
         }
@@ -109,12 +108,12 @@ public:
         if(artistID<=0) return INVALID_INPUT;
         try{
             // find artist in the table
-            Node<int,Artist>* artist= this->artistTable.getRoot.find(artistID);
+            Node<int,Artist>* artist= this->artistHashTable.getRoot.find(artistID);
 
             // check if he has any songs
             if(artist->getData()->getSongRoot() != nullptr) return FAILURE;
 
-            this->artistTable->deleteFromTable();
+            this->artistHashTable->deleteFromTable();
 
             return SUCCESS;
         }
@@ -130,8 +129,8 @@ public:
     StatusType AddSong(int artistID, int songID){
         try {
             // find artist in table
-            Avl<int, Artist> *artistTree = this->artistTable[artistID].getRoot;
-            Artist *artist = artistTree->find(artistID)->getData();
+            Avl<int, Artist> *artistHashTable = this->artistHashTable[artistID].getRoot;
+            Artist *artist = artistHashTable->find(artistID)->getData();
             Song* song = new Song(songID,artistID,0);
             artist->addSong(song);
         } catch () {
@@ -144,8 +143,8 @@ public:
     StatusType RemoveSong(int artistID, int songID){
         try {
             // find artist in table
-            Avl<int, Artist> *artistTree = this->artistTable[artistID].getRoot;
-            Artist *artist = artistTree->find(artistID)->getData();
+            Avl<int, Artist> *artistHashTable = this->artistHashTable[artistID].getRoot;
+            Artist *artist = artistHashTable->find(artistID)->getData();
             Song* song = new Song(songID,artistID,0);
             artist->addSong(song);
         } catch () {
@@ -160,7 +159,7 @@ public:
         if(artistID<=0 || songID<0) return INVALID_INPUT;
         try{
             // find artist in table
-            Node<int,Artist>* artistNode = this->artistTable.find(artistID)->getData();
+            Node<int,Artist>* artistNode = this->artistHashTable.find(artistID)->getData();
             Song* song = artistNode->getData()->getSong(songID);
             Disc* discOld = song->getDisc();
             Node<int,Avl<int,Disc>>* rankNodeOld = discOld->getRankPtr();
@@ -254,7 +253,7 @@ public:
     StatusType NumberOfStreams(int artistID, int songID, int *streams){
         if(artistID<=0 || songID<0) return INVALID_INPUT;
         try {
-            Artist* artist= this->artistTree.find(artistID)->getData();
+            Artist* artist= this->artistHashTable.find(artistID)->getData();
             if(artist->getNumOfSongs()<=songID) return INVALID_INPUT;
             *streams = artist->getSong(songID)->getPopularity();
             return SUCCESS;

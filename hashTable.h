@@ -36,6 +36,10 @@ public:
     void addArtist(Artist* artist);
     void removeArtist(int artistID);
     Artist* findArtist(int artistID);
+    int getTableSize(){ return this->arrSize; }
+    Avl<int,Artist>** getArray(){
+        return this->arr;
+    }
 };
 
 /*
