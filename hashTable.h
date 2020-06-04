@@ -29,19 +29,13 @@ private:
     friend class ArtistPredicate;
 
 public:
-    explicit HashTable(){
-        this->arr = new Avl<int,Artist>*[MAGIC_SIZE]();
-        initArr(this->arr,MAGIC_SIZE);
-        this->numOfUsedCells = 0;
-        this->arrSize = MAGIC_SIZE;
-    };
+    explicit HashTable();
     ~HashTable();
     HashTable(const HashTable&) = delete;
     HashTable& operator=(const HashTable&) = delete;
     void addArtist(Artist* artist);
     void removeArtist(int artistID);
     Artist* findArtist(int artistID);
-
 };
 
 /*
@@ -199,6 +193,6 @@ Artist* HashTable::findArtist(int artistID){
 
     // find artist in the tree at the appropriate cell at the table
     return this->arr[index]->find(artistID)->getData();
-}
+};
 
 #endif //DTS2_EX2_HASHTABLE_H
