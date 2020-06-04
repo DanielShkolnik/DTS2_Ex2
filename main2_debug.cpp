@@ -87,14 +87,27 @@ static bool isInit = false;
 
 int main(int argc, const char**argv) {
 
-    char buffer[MAX_STRING_INPUT_SIZE];
+    std::string line;
+    std::ifstream myfile ("in14.txt");
+    freopen ("out14_our.txt","w",stdout);
+    int i = 1;
+    if (myfile.is_open())
+    {
+        while ( getline (myfile,line) )
+        {
+            if(i==57){
+                int j=0;
+            }
+            //std::cout << std::endl;
+            if (parser(line.c_str()) == error)
+                break;
+            i++;
+        }
+        myfile.close();
+    }
 
-    // Reading commands
-    while (fgets(buffer, MAX_STRING_INPUT_SIZE, stdin) != NULL) {
-        fflush(stdout);
-        if (parser(buffer) == error)
-            break;
-    };
+    else std::cout << "Unable to open file";
+    fclose (stdout);
     return 0;
 }
 
