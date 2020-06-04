@@ -17,13 +17,13 @@
 
 class MusicManager{
 private:
-Avl<int,Song>* bestHitsTree;
+Avl<KeyBestHitsTree,Song>* bestHitsTree;
 HashTable artistHashTable;
 int totalSongs;
 
 public:
     /* Create empty Tree and empty hash table */
-    MusicManager(): bestHitsTree(new Avl<int,Song>), artistHashTable(), totalSongs(0) {};
+    MusicManager(): bestHitsTree(new Avl<KeyBestHitsTree,Song>), artistHashTable(), totalSongs(0) {};
 
     /* Function used by MusicManager destructor to iterate over song tree and delete all of the data stored in the nodes */
     class SongPredicate{
@@ -74,7 +74,7 @@ public:
      * Functionality:
      * Creates new artist and inserts him into artist table.
      *
-     * Return values: INVALID_INPUT: in case illegal artistID\number of songs.
+     * Return values: INVALID_INPUT: in case illegal artistID.
      *                ALLOCATION_ERROR.
      *                FAILURE: in case artist already exists.
      * */
@@ -128,19 +128,27 @@ public:
         }
     };
 
-    /* Add Song */
+    /* Add Song - insert song into adequate artist's song tree */
     StatusType AddSong(int artistID, int songID){
         if(artistID<=0 || songID<=0) { return INVALID_INPUT; }
+        Song* song;
         try {
             // find artist in table
             Artist *artist = this->artistHashTable.findArtist(artistID);
 
             // create new song
-            Song* song = new Song(songID,artistID);
+            song = new Song(songID,artistID);
 
             // add song to artist's song tree
             artist->addSong(song);
 
+            // create key for current song to insert into bestHitsTree
+            KeyBestHitsTree key = KeyBestHitsTree(songID,artistID,0);
+
+            // add song to bestHitsTree
+            bestHitsTree->insert(key,song);
+
+            // update total number of songs stored in the system
             this->totalSongs++;
 
             return SUCCESS;
@@ -152,10 +160,23 @@ public:
         catch(Avl<int,Artist>::KeyNotFound&){
             return FAILURE;
         }
+        // In case song exists
+        catch(Avl<int,Song>::KeyExists&){
+            delete song;
+            return FAILURE;
+        }
+        catch(Avl<KeyBestHitsTree,Song>::KeyExists&){
+            delete song;
+            return FAILURE;
+        }
+        catch(Avl<KeyPopulartiyID,Song>::KeyExists&) {
+            delete song;
+            assert(false);
+            return FAILURE;
+        }
     }
 
-    /* Remove Song - Dont forget to delete data */
-    //Remember not Delete song before this function
+    /* Remove song from artist song tree */
     StatusType RemoveSong(int artistID, int songID){
         if(artistID<=0 || songID<=0) { return INVALID_INPUT; }
         try {
@@ -163,28 +184,59 @@ public:
             Artist *artist = this->artistHashTable.findArtist(artistID);
             // get song to delete
             Song* song = artist->getSongByID(songID)->getData();
+            // artist deletes the adequate node which holds the song we need to delete
             artist->removeSong(songID);
+            delete song;
+            // update total number of songs stored in the system
             this->totalSongs--;
             return SUCCESS;
         }
         catch(std::bad_alloc& e) {
             return ALLOCATION_ERROR;
         }
-            // In case artist not found
+        // In case artist not found
         catch(Avl<int,Artist>::KeyNotFound&){
+            return FAILURE;
+        }
+        // In case song not found
+        catch(Avl<int,Song>::KeyNotFound&){
+            return FAILURE;
+        }
+        catch(Avl<KeyPopulartiyID,Song>::KeyNotFound&){
+            return FAILURE;
+        }
+        catch(Avl<KeyPopulartiyID,Song>::KeyExists&){
+            assert(false);
             return FAILURE;
         }
     }
 
     /*
-     * Updates song's number of plays and update's it's rank in the bestHitsTree accordingly.
+     * Function used to Update song's number of plays and to update it's rank in the bestHitsTree accordingly.
      */
     StatusType AddToSongCount(int artistID, int songID, int count){
-        if(artistID<=0 || songID<0) return INVALID_INPUT;
+        if(artistID<=0 || songID<=0 || count<=0) return INVALID_INPUT;
         try{
             // find artist in table
             Artist* artist = this->artistHashTable.findArtist(artistID);
+
+            Song* song = artist->getSongByID(songID)->getData();
+
+            // remove from bestHitsTree, update number of plays, and insert back
+            KeyBestHitsTree key = KeyBestHitsTree(songID,artistID,song->getPopularity());
+
+            // delete song from tree
+            this->bestHitsTree->deleteVertice(key);
+
+            // update songs number of plays
             artist->addCount(songID,count);
+
+            // create updated key for song
+            key = KeyBestHitsTree(songID,artistID,song->getPopularity());
+
+            // insert back into bestHitsTree
+            this->bestHitsTree->insert(key,song);
+
             return SUCCESS;
         }
         catch(std::bad_alloc&) {
@@ -193,20 +245,30 @@ public:
         catch(Avl<int,Artist>::KeyNotFound&){
             return FAILURE;
         }
+        catch(Avl<int,Song>::KeyNotFound&){
+            return FAILURE;
+        }
+        // if song isn't in bestHitsTree
+        catch(Avl<KeyBestHitsTree,Song>::KeyNotFound&){
+            return FAILURE;
+        }
     }
 
     /*
-     * Go to songs and return the number of it's streams
+     * Find artist and get from his song tree the most played song.
      */
     StatusType  GetArtistBestSong(int artistID, int *songID){
         if(artistID<=0 || songID == nullptr) return INVALID_INPUT;
         try {
+            // find artist in hash table
             Artist* artist= this->artistHashTable.findArtist(artistID);
 
             // artist has no songs
             if(artist->getRootInSongTreeByID() == nullptr) return FAILURE;
 
+            // get number of streams of the most popular song
             *songID = artist->getMostPlayed()->getSongID();
+
             return SUCCESS;
         }
         catch (std::bad_alloc& e) {
@@ -217,28 +279,31 @@ public:
         }
     }
 
+    /*
+     * Use Select(k) algorithm as seen in the tutorial in order to find the song in rank "rank".
+     */
     StatusType GetRecommendedSongInPlace(int rank, int *artistID, int *songID){
-        if(rank <= 0) return INVALID_INPUT;
+        if(rank <= 0 || artistID == nullptr || songID == nullptr) return INVALID_INPUT;
         if(this->totalSongs<rank) return FAILURE;
         try {
-            Node<int,Song>* current = this->bestHitsTree->getRoot();
+            Node<KeyBestHitsTree,Song>* current = this->bestHitsTree->getRoot();
             int k=rank;
             while(current!= nullptr){
-                if(current->getLeft()->getRank()==k-1) {
+                if(current->getLeft() != nullptr && current->getLeft()->getRank()==k-1) {
                     *artistID=current->getData()->getArtistID();
                     *songID=current->getData()->getSongID();
                     return SUCCESS;
                 }
-                else if(current->getLeft()->getRank()>k-1){
+                else if(current->getLeft() != nullptr && current->getLeft()->getRank()>k-1){
                     current=current->getLeft();
                 }
-                else if(current->getLeft()->getRank()<k-1){
+                else if(current->getRight() != nullptr && current->getLeft()->getRank()<k-1){
                     current=current->getRight();
                     k = k-current->getLeft()->getRank()-1;
                 }
             }
 
-            return FAILURE;
+            return SUCCESS;
         }
         catch(std::bad_alloc&) {
             return ALLOCATION_ERROR;

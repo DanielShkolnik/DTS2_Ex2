@@ -35,6 +35,7 @@ public:
         KeyPopulartiyID key = KeyPopulartiyID(songID,song->getPopularity());
         this->songTreeByPlays->deleteVertice(key);
         song->increasePopularity(count);
+        key = KeyPopulartiyID(songID,song->getPopularity());
         this->songTreeByPlays->insert(key,song);
         KeyPopulartiyID keyMostPlayedSong = KeyPopulartiyID(this->mostPlayedSong->getSongID(),this->mostPlayedSong->getPopularity());
         if(key > keyMostPlayedSong){
@@ -55,10 +56,6 @@ public:
         return this->songTreeByID->getRoot();
     }
 
-    /*
-    Node<KeyPopulartiyID,Song>* getRootInSongTreeByPlays(){
-        return this->songTreeByPlays->getRoot();
-    }*/
 
     void addSong(Song* song){
         this->songTreeByID->insert(song->getSongID(),song);
