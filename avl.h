@@ -49,7 +49,6 @@ public:
     bool isEmpty();
 
     Node<K,D>* getMaxNode();
-    void IncreaseRank(K key);
 
     class Error{};
     class KeyExists{};
@@ -58,35 +57,6 @@ public:
 
 };
 
-template <class K, class D>
-void Avl<K,D>::IncreaseRank(K key){
-    // Avl is empty
-    if(this->root == nullptr) return;
-
-    // Create iterator
-    Node<K,D>* iter = this->root;
-    Node<K,D>* previous = this->root;
-
-    while(iter){
-        previous = iter;
-
-        // I'm the nearest to myself
-        if(key == iter->getKey()){
-            return;
-        }
-
-        iter->getData()
-        else if(key > iter->getKey()){
-            iter = iter->getRight();
-        }
-
-        else if(key < iter->getKey()){
-            iter = iter->getLeft();
-        }
-
-    }
-
-}
 
 template <class K, class D>
 void Avl<K,D>::deleteVertice(const K& key){
@@ -281,7 +251,8 @@ void Avl<K,D>::rotateLL(Node<K,D>* B){
     if(ARight != nullptr) fixRelations(B,ARight);
     B->calcHeight();
     A->calcHeight();
-    B->updateRank
+    B->updateRank();
+    A->updateRank();
 }
 
 template <class K, class D>
@@ -312,6 +283,9 @@ void Avl<K,D>::rotateLR(Node<K,D>* nodeC){
     nodeB->calcHeight();
     nodeC->calcHeight();
     nodeA->calcHeight();
+    nodeB->updateRank();
+    nodeC->updateRank();
+    nodeA->updateRank();
 }
 
 template <class K, class D>
@@ -382,6 +356,8 @@ void Avl<K,D>::rotateRR(Node<K,D>* B){
     if (ALeft!= nullptr) fixRelations(B,ALeft);
     B->calcHeight();
     A->calcHeight();
+    B->updateRank();
+    A->updateRank();
 }
 
 template <class K, class D>
@@ -406,6 +382,9 @@ void Avl<K,D>::rotateRL(Node<K,D>* C){
     C->calcHeight();
     B->calcHeight();
     A->calcHeight();
+    C->updateRank();
+    B->updateRank();
+    A->updateRank();
 }
 
 template <class K, class D, class P>

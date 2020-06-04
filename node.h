@@ -31,7 +31,7 @@ private:
 
 public:
     Node()= delete;
-    Node(K key, D* data, Node* parent):key(key),data(data),parent(parent),left(nullptr),right(nullptr),height(1){};
+    Node(K key, D* data, Node* parent):key(key),data(data),parent(parent),left(nullptr),right(nullptr),height(1),rank(1){};
     ~Node() = default;
     Node(const Node& node) = delete;
     Node& operator=(const Node& node) = delete;
@@ -128,6 +128,23 @@ public:
     void setRank(int rank){
         this->rank = rank;
     }
+
+    void updateRank(){
+        if(this->getLeft()!= nullptr && this->getRight()!= nullptr){
+            this->rank = this->getLeft()->getRank() + this->getRight()->getRank() + 1;
+        }
+        else if(this->getLeft()!= nullptr && this->getRight()== nullptr){
+            this->rank = this->getLeft()->getRank() + 1;
+        }
+        else if(this->getLeft()== nullptr && this->getRight()!= nullptr){
+            this->rank = this->getRight()->getRank() + 1;
+        }
+        //if vertice is leaf
+        else{
+            this->rank = 1;
+        }
+    }
+
 
 };
 
