@@ -181,7 +181,7 @@ void HashTable::removeArtist(int artistID){
     /* Check if only quarter of the table is at use. If so, decrease table size to half it's size
      * Else, Do nothing.
      */
-    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGICSIZE){
+    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGIC_SIZE){
         this->decreaseSize();
     }
 
