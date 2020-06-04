@@ -148,6 +148,7 @@ HashTable::HashTable(){
 
 HashTable::~HashTable(){
     this->deleteArr();
+    delete this->arr;
 }
 
 /*

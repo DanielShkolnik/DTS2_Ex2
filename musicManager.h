@@ -22,7 +22,8 @@ HashTable artistHashTable;
 int totalSongs;
 
 public:
-    MusicManager(): bestHitsTree(new Avl<int,Song>), artistHashTable() {};
+    /* Create empty Tree and empty hash table */
+    MusicManager(): bestHitsTree(new Avl<int,Song>), artistHashTable(), totalSongs(0) {};
 
     /* Function used by MusicManager destructor to iterate over song tree and delete all of the data stored in the nodes */
     class SongPredicate{
@@ -35,7 +36,7 @@ public:
         SongPredicate(const SongPredicate& a) = delete;
     };
 
-    /* Function used by MusicManager destructor to iterate over artist tree and delete all of it's nodes */
+    /* Function used by MusicManager destructor to iterate over artist tree and delete all of the songs  */
     class ArtistPredicate{
     public:
         void operator()(Node<int,Artist>* artistNode){
@@ -46,6 +47,8 @@ public:
             SongPredicate songDelete;
 
             postorder<int,Song,SongPredicate>(songNode,songDelete);
+
+            delete artistNode->getData();
         }
         explicit ArtistPredicate() = default;
         ArtistPredicate(const ArtistPredicate& a) = delete;
@@ -61,8 +64,8 @@ public:
             ArtistPredicate artistPredicate;
 
             postorder<int,Artist,ArtistPredicate>(artistNode,artistPredicate);
-
         }
+        delete bestHitsTree;
     }
     MusicManager(const MusicManager& musicManager) = delete;
     MusicManager& operator=(const MusicManager& musicManager) = delete;
