@@ -93,7 +93,7 @@ void HashTable::increaseSize(){
     /* For each cell in the old Hash table, copy the artist tree to the new Hash table */
     for (int i = 0; i < this->arrSize; i++) {
         // get the root of artist tree of the current cell of the table
-        Node<int, Artist> *artistNode = this->arr[i]->getRoot();
+        Node<int,Artist>* artistNode = this->arr[i]->getRoot();
 
         // predicate instantiation
         ArtistPredicate artistPredicate(newTable, newSize);
@@ -141,6 +141,13 @@ int HashTable::hash(int artistID, int arrSize){
     return artistID%arrSize;
 }
 
+HashTable::HashTable(){
+    this->arr = new Avl<int,Artist>*[MAGIC_SIZE]();
+    initArr(this->arr,MAGIC_SIZE);
+    this->numOfUsedCells = 0;
+    this->arrSize = MAGIC_SIZE;
+};
+
 HashTable::~HashTable(){
     this->deleteArr();
 }
@@ -170,6 +177,7 @@ void HashTable::addArtist(Artist* artist){
  * Remove artist from the tree at the adequate index of the hash table.
  */
 void HashTable::removeArtist(int artistID){
+    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGIC_SIZE){
     /* Check if only quarter of the table is at use. If so, decrease table size to half it's size
      * Else, Do nothing.
      */
