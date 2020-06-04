@@ -23,7 +23,7 @@ public:
             return true;
         }
         else if(this->numOfPlays == other.numOfPlays){
-            if (this->songID > other.songID) {
+            if (this->songID < other.songID) {
                 return true;
             }
         }

@@ -180,84 +180,8 @@ public:
         if(artistID<=0 || songID<0) return INVALID_INPUT;
         try{
             // find artist in table
-            Node<int,Artist>* artistNode = this->artistHashTable.find(artistID)->getData();
-            Song* song = artistNode->getData()->getSong(songID);
-            Disc* discOld = song->getDisc();
-            Node<int,Avl<int,Disc>>* rankNodeOld = discOld->getRankPtr();
-
-            // take out song from old disc since it's number of plays doesn't match to the discs anymore
-            discOld->removeSong(songID);
-
-            // if there are no songs in the disc - we can delete it
-            if(discOld->getSongTree()->isEmpty()){
-                delete discOld;
-                rankNodeOld->getData()->deleteVertice(artistID);
-            }
-
-            // update songs num of plays
-            artist->addCount(songID);
-
-            int popularity = song->getPopularity();
-
-            /* if the next element in list exists & matches the new popularity rank of the song:
-             * check if there's a disc which matches to the artist of this song in the next element of the list
-             * if there is - insert song into adequate disc & update song's disc ptr
-             */
-            if(rankNodeOld->getNext()!= nullptr && rankNodeOld->getNext()->getKey()==popularity){
-                try{
-                    Disc* disc=rankNodeOld->getNext()->getData()->find(artistID)->getData();
-                    disc->addSong(song);
-                    song->setDisc(disc);
-                }
-                // if there isn't appropriate disc - create one. insert it into the disc tree of the next rank.
-                // insert song into disc's song tree & update disc's ptr to rank element & song's ptr to disc
-                catch(Avl<int,Disc>::KeyNotFound& e){
-                    Disc* discNew = new Disc(artistID);
-                    rankNodeOld->getNext()->getData()->insert(artistID,discNew);
-                    discNew->setRankPtr(rankNodeOld->getNext());
-                    discNew->addSong(song);
-                    song->setDisc(discNew);
-                }
-            }
-
-
-            /* In case rank doesn't exist - create new one. create new disc. insert disc into disc's tree of rank
-             * element & update disc's pointer to the rank. insert song into disc's song tree & update song's ptr
-             * to disc.
-             */
-            else{
-                Node<int,Avl<int,Disc>>* rankNodeNew = new Node<int,Avl<int,Disc>>(popularity, new Avl<int,Disc>);
-                rankNodeNew->setPrev(rankNodeOld);
-                rankNodeNew->setNext(rankNodeOld->getNext());
-                if(rankNodeOld->getNext()!= nullptr) rankNodeOld->getNext()->setPrev(rankNodeNew);
-                rankNodeOld->setNext(rankNodeNew);
-                Disc* discNew = new Disc(artistID);
-                rankNodeNew->getData()->insert(artistID,discNew);
-                discNew->setRankPtr(rankNodeNew);
-                discNew->addSong(song);
-                song->setDisc(discNew);
-            }
-
-            /* check if the old rank, from which we removed the song is empty.
-             * if so - update start and end pointers of the list and delete this rank.
-             * */
-            if(rankNodeOld->getData()->isEmpty()){
-                if(this->bestHitsListStart->getKey() == rankNodeOld->getKey()){
-                    this->bestHitsListStart = rankNodeOld->getNext();
-                }
-                if(this->bestHitsListFinish->getKey() == rankNodeOld->getKey()){
-                    this->bestHitsListFinish = rankNodeOld->getNext();
-                }
-
-                delete rankNodeOld->getData();
-                rankNodeOld->removeNode();
-            }
-
-            if(this->bestHitsListFinish->getNext()!= nullptr){
-                this->bestHitsListFinish=this->bestHitsListFinish->getNext();
-
-            }
-
+            Artist* artist = this->artistHashTable.findArtist(artistID);
+            artist->addCount(songID,count);
             return SUCCESS;
         }
         catch(std::bad_alloc&) {
@@ -271,12 +195,15 @@ public:
     /*
      * Go to songs and return the number of it's streams
      */
-    StatusType NumberOfStreams(int artistID, int songID, int *streams){
-        if(artistID<=0 || songID<0) return INVALID_INPUT;
+    StatusType  GetArtistBestSong(int artistID, int *songID){
+        if(artistID<=0 || songID == nullptr) return INVALID_INPUT;
         try {
-            Artist* artist= this->artistHashTable.find(artistID)->getData();
-            if(artist->getNumOfSongs()<=songID) return INVALID_INPUT;
-            *streams = artist->getSong(songID)->getPopularity();
+            Artist* artist= this->artistHashTable.findArtist(artistID);
+
+            // artist has no songs
+            if(artist->getRootInSongTreeByID() == nullptr) return FAILURE;
+
+            *songID = artist->getMostPlayed()->getSongID();
             return SUCCESS;
         }
         catch (std::bad_alloc& e) {
