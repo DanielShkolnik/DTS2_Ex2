@@ -75,18 +75,17 @@ public:
      *                ALLOCATION_ERROR.
      *                FAILURE: in case artist already exists.
      * */
-    StatusType AddArtist(int artistID, int numOfSongs){
+    StatusType AddArtist(int artistID){
         if(artistID<=0){
             return INVALID_INPUT;
         }
         Artist* artist;
         try {
-
             // create artist node
             Artist* artist = new Artist(artistID);
 
             // insert into table
-            this->artistHashTable->insertTable(artistID,artist);
+            this->artistHashTable.addArtist(artist);
 
             return SUCCESS;
         }
@@ -108,12 +107,13 @@ public:
         if(artistID<=0) return INVALID_INPUT;
         try{
             // find artist in the table
-            Node<int,Artist>* artist= this->artistHashTable.getRoot.find(artistID);
+            Artist* artist= this->artistHashTable.findArtist(artistID);
 
             // check if he has any songs
-            if(artist->getData()->getSongRoot() != nullptr) return FAILURE;
+            if(artist->getRootInSongTreeByID() != nullptr) return FAILURE;
 
-            this->artistHashTable->deleteFromTable();
+            // delete artist from table
+            this->artistHashTable.removeArtist(artistID);
 
             return SUCCESS;
         }
@@ -127,28 +127,49 @@ public:
 
     /* Add Song */
     StatusType AddSong(int artistID, int songID){
+        if(artistID<=0 || songID<=0) { return INVALID_INPUT; }
         try {
             // find artist in table
-            Avl<int, Artist> *artistHashTable = this->artistHashTable[artistID].getRoot;
-            Artist *artist = artistHashTable->find(artistID)->getData();
-            Song* song = new Song(songID,artistID,0);
-            artist->addSong(song);
-        } catch () {
+            Artist *artist = this->artistHashTable.findArtist(artistID);
 
+            // create new song
+            Song* song = new Song(songID,artistID);
+
+            // add song to artist's song tree
+            artist->addSong(song);
+
+            this->totalSongs++;
+
+            return SUCCESS;
+        }
+        catch(std::bad_alloc& e) {
+            return ALLOCATION_ERROR;
+        }
+        // In case artist not found
+        catch(Avl<int,Artist>::KeyNotFound&){
+            return FAILURE;
         }
     }
 
     /* Remove Song - Dont forget to delete data */
     //Remember not Delete song before this function
     StatusType RemoveSong(int artistID, int songID){
+        if(artistID<=0 || songID<=0) { return INVALID_INPUT; }
         try {
             // find artist in table
-            Avl<int, Artist> *artistHashTable = this->artistHashTable[artistID].getRoot;
-            Artist *artist = artistHashTable->find(artistID)->getData();
-            Song* song = new Song(songID,artistID,0);
-            artist->addSong(song);
-        } catch () {
-
+            Artist *artist = this->artistHashTable.findArtist(artistID);
+            // get song to delete
+            Song* song = artist->getSongByID(songID)->getData();
+            artist->removeSong(songID);
+            this->totalSongs--;
+            return SUCCESS;
+        }
+        catch(std::bad_alloc& e) {
+            return ALLOCATION_ERROR;
+        }
+            // In case artist not found
+        catch(Avl<int,Artist>::KeyNotFound&){
+            return FAILURE;
         }
     }
 

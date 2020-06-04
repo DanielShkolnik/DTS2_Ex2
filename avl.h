@@ -49,6 +49,7 @@ public:
     bool isEmpty();
 
     Node<K,D>* getMaxNode();
+    void IncreaseRank(K key);
 
     class Error{};
     class KeyExists{};
@@ -57,7 +58,35 @@ public:
 
 };
 
+template <class K, class D>
+void Avl<K,D>::IncreaseRank(K key){
+    // Avl is empty
+    if(this->root == nullptr) return;
 
+    // Create iterator
+    Node<K,D>* iter = this->root;
+    Node<K,D>* previous = this->root;
+
+    while(iter){
+        previous = iter;
+
+        // I'm the nearest to myself
+        if(key == iter->getKey()){
+            return;
+        }
+
+        iter->getData()
+        else if(key > iter->getKey()){
+            iter = iter->getRight();
+        }
+
+        else if(key < iter->getKey()){
+            iter = iter->getLeft();
+        }
+
+    }
+
+}
 
 template <class K, class D>
 void Avl<K,D>::deleteVertice(const K& key){
@@ -169,6 +198,7 @@ void Avl<K,D>::insert(const K& key, D* data){
     } catch(const Avl<K,D>::KeyExists&) {
         throw Avl<K, D>::KeyExists();
     }
+    IncreaseRank();
 
     Node<K,D>* newNode = new Node<K,D>(key,data,nearest);
     if(nearest == nullptr){
@@ -180,11 +210,16 @@ void Avl<K,D>::insert(const K& key, D* data){
     this->fixBalanceFactor(newNode);
     this->updateRoot(newNode);
 }
+void updateRank(){
+
+}
 
 template <class K, class D>
 void Avl<K,D>::fixBalanceFactor(Node<K,D>* vertice){
     if(vertice->isLeaf()){
         vertice->calcHeight();
+        // update vertice rank
+        vertice->updateRank();
         vertice = vertice->getParent();
         updateRoot(vertice);
     }
@@ -197,6 +232,9 @@ void Avl<K,D>::fixBalanceFactor(Node<K,D>* vertice){
 
         // update vertice height
         vertice->calcHeight();
+
+        // update vertice rank
+        vertice->updateRank();
 
         // get vertice BF
         int currentBF = this->getBF(vertice);
@@ -243,6 +281,7 @@ void Avl<K,D>::rotateLL(Node<K,D>* B){
     if(ARight != nullptr) fixRelations(B,ARight);
     B->calcHeight();
     A->calcHeight();
+    B->updateRank
 }
 
 template <class K, class D>
