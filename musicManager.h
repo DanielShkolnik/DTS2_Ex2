@@ -282,6 +282,7 @@ public:
     /*
      * Use Select(k) algorithm as seen in the tutorial in order to find the song in rank "rank".
      */
+    // need to check
     StatusType GetRecommendedSongInPlace(int rank, int *artistID, int *songID){
         if(rank <= 0 || artistID == nullptr || songID == nullptr) return INVALID_INPUT;
         if(this->totalSongs<rank) return FAILURE;
