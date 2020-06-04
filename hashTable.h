@@ -46,8 +46,6 @@ void HashTable::deleteArr(){
     }
 }
 
-
-
 void HashTable::initArr(Avl<int,Artist>** array, int size){
     for(int i=0; i<size; i++){
         array[i] = new Avl<int,Artist>;
@@ -112,5 +110,8 @@ HashTable::~HashTable(){
     this->deleteArr();
 }
 
+void addArtist(int artistID){
+
+};
 
 #endif //DTS2_EX2_HASHTABLE_H
