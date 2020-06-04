@@ -93,5 +93,9 @@ int HashTable::hash(int artistID, int arrSize){
     return artistID%arrSize;
 }
 
+HashTable::~HashTable(){
+    this->deleteArr();
+}
+
 
 #endif //DTS2_EX2_HASHTABLE_H
