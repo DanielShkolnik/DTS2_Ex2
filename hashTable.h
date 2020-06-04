@@ -116,7 +116,7 @@ void addArtist(int artistID){
 
 };
 void HashTable::removeArtist(int artistID){
-    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGICSIZE){
+    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGIC_SIZE){
         this->decreaseSize();
     }
     int index = this->hash(artistID,this->arrSize);
