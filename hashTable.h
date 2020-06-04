@@ -9,6 +9,8 @@
 #include "artist.h"
 #include <iostream>
 
+#define MAGIC_SIZE 7
+
 class HashTable{
 private:
     Avl<int,Artist>** arr;
@@ -22,7 +24,12 @@ private:
     static int hash(int artistID, int arrSize);
 
 public:
-    explicit HashTable();
+    explicit HashTable(){
+        this->arr = new Avl<int,Artist>*[MAGIC_SIZE]();
+        initArr(this->arr,MAGIC_SIZE);
+        this->numOfUsedCells = 0;
+        this->arrSize = MAGIC_SIZE;
+    };
     ~HashTable();
     HashTable(const HashTable&) = delete;
     HashTable& operator=(const HashTable&) = delete;
@@ -32,6 +39,14 @@ public:
     friend class ArtistPredicate;
 
 };
+
+void HashTable::deleteArr(){
+    for (int i=0; i<this->arrSize;i++){
+        delete arr[i];
+    }
+}
+
+
 
 void HashTable::initArr(Avl<int,Artist>** array, int size){
     for(int i=0; i<size; i++){
@@ -105,6 +120,10 @@ void HashTable::decreaseSize(){
     delete[] this->arr;
     this->size = new_size;
     this->arr = newArr;
+};
+
+void addArtist(int artistID){
+  int
 };
 
 
