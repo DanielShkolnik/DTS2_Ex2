@@ -333,15 +333,9 @@ public:
     };
 
 
-    /*
-     * Function iterates over the BestHitsList from the end and fills the artists and songs arrays in a sorted manner
-     * First comparison by artist and second comparison by song.
-     * Since each element in rank list hold disc tree & each disc hold song tree -
-     * Need to do inorder traversal on every song tree of each disc,and on the disc tree of each rank list element
-     * Until we filled the required number of indices. then, as soon as our counter is zeroed, we stop the traversal.
-     * */
-    StatusType GetRecommendedSongs(int numOfSongs, int *artists, int *songs){
-        //if(numOfSongs <= 0) return INVALID_INPUT;
+
+    StatusType GetRecommendedSongInPlace(int rank, int *artists, int *songs){
+        if(rank <= 0) return INVALID_INPUT;
         if(numOfSongs > this->totalSongs) return FAILURE;
         try {
             int i = 0, j=numOfSongs;
