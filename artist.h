@@ -7,7 +7,7 @@
 
 #include "node.h"
 #include "song.h"
-
+// test
 class Artist{
 private:
     int artistID;
