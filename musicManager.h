@@ -359,19 +359,26 @@ public:
         if(this->totalSongs<rank) return FAILURE;
         try {
             Node<int,Song>* current = this->bestHitsTree->getRoot();
-
-
+            int k=rank;
+            while(current!= nullptr){
+                if(current->getLeft()->getRank()==k-1) {
+                    *artistID=current->getData()->getArtistID();
+                    *songID=current->getData()->getSongID();
+                    return SUCCESS;
+                }
+                else if(current->getLeft()->getRank()>k-1){
+                    current=current->getLeft();
+                }
+                else if(current->getLeft()->getRank()<k-1){
+                    current=current->getRight();
+                    k = k-current->getLeft()->getRank()-1;
+                }
             }
-            return SUCCESS;
-        }
-        catch (Artist::INVALID_INPUT& e) {
-            return INVALID_INPUT;
+
+            return FAILURE;
         }
         catch(std::bad_alloc&) {
             return ALLOCATION_ERROR;
-        }
-        catch(Avl<int,Artist>::KeyExists& e) {
-            return FAILURE;
         }
     }
 
