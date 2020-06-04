@@ -15,7 +15,7 @@ private:
     Song* mostPlayedSong;
     Avl<int,Song>* bestHitsTree;
 public:
-    Artist(int artistID,int numOfSongs):artistID(artistID){
+    Artist(int artistID):artistID(artistID){
         this->bestHitsTree = new Avl<int,Song>();
         mostPlayedSong = nullptr;
     };
@@ -30,9 +30,14 @@ public:
     int getArtistID() const {
         return this->artistID;
     }
-
     Node<int,Song>* getSong(int songID){
         return this->bestHitsTree->find(songID);
+    }
+    Node<int,Song>* getSongRoot(){
+        return this->bestHitsTree->getRoot();
+    }
+    void addSong(Song* song){
+        this->bestHitsTree->insert(song->getSongID(),song);
     }
 
     class INVALID_INPUT{};

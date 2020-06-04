@@ -27,6 +27,7 @@ private:
     Node<K,D>* left;
     Node<K,D>* right;
     int height;
+    int rank;
 
 public:
     Node()= delete;

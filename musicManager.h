@@ -8,96 +8,73 @@
 #include "avl.h"
 #include "node.h"
 #include "artist.h"
-#include "disc.h"
 #include "song.h"
-#include "library1.h"
 #include "exception"
+#include "library2.h"
+#include "key.h"
 #include <iostream>
 
 class MusicManager{
 private:
-Avl<int,Artist> artistTree;
-
-// Ranked linked list to keep songs by number of listenings
-Node<int,Avl<int,Disc>>* bestHitsListStart;
-Node<int,Avl<int,Disc>>* bestHitsListFinish;
-int totalSongs;
+Avl<int,Song>* songTree;
+Hash<int,AVL<int,Artist>>* artistTable;
 
 public:
-    MusicManager():totalSongs(0){
-        this->bestHitsListStart = new Node<int,Avl<int,Disc>>(0, new Avl<int,Disc>);
-        this->bestHitsListFinish = this->bestHitsListStart;
+    MusicManager(){
+        // init hash table of size 2 in O(1)
+        this->songTree = new Avl<int,Song>();
     }
 
     /* Function used by MusicManager destructor to iterate over disc tree and delete all of it's nodes */
-   class DiscPredicateDelete{
+    class SongPredicate{
     public:
-        void operator()(Node<int,Disc>* discNode){
+        void operator()(Node<int,Song>* songNode){
             // delete disc
-            delete discNode->getData();
+            delete songNode->getData();
         }
-        explicit DiscPredicateDelete() = default;
-        DiscPredicateDelete(const DiscPredicateDelete& a) = delete;
+        explicit SongPredicate() = default;
+        SongPredicate(const SongPredicate& a) = delete;
     };
 
     /* Function used by MusicManager destructor to iterate over artist tree and delete all of it's nodes */
     class ArtistPredicate{
     public:
         void operator()(Node<int,Artist>* artistNode){
-            // delete artist
-            delete artistNode->getData();
+            // get the root of song tree of the current artist
+            Node<int,Song>* songNode = artistNode->getData()->getSongRoot();
+
+            // do postorder to free data (song) in each node
+            SongPredicate songDelete;
+
+            postorder<int,Song,SongPredicate>(songNode,songDelete);
         }
         explicit ArtistPredicate() = default;
         ArtistPredicate(const ArtistPredicate& a) = delete;
     };
 
     ~MusicManager(){
-        Node<int,Avl<int,Disc>>* current = this->bestHitsListStart;
-        Node<int,Avl<int,Disc>>* prev = current;
+        /* For each artist in the Hash table, iterate over it's songs tree, and delete all the song from the tree nodes */
+        for(int i = 0; i<this->artistTable->getTableSize; i++){
+            // get the root of artist tree of the current cell of the table
+            Node<int,Artist>* artistNode = artistTable[i]->getRoot;
 
-        /* Go through all nodes of ranked linked list  */
-        while(current!= nullptr){
-            current= current->getNext();
+            // do postorder to free data (song) for each artist
+            ArtistPredicate artistPredicate;
 
-            // get the root of disc tree of the prev node in BestHitList
-            Node<int,Disc>* discNode = prev->getData()->getRoot();
+            postorder<int,Artist,ArtistPredicate>(artistNode,artistPredicate);
 
-            // do postorder to free data (disc) in each node
-            DiscPredicateDelete discDelete;
-
-            postorder<int,Disc,DiscPredicateDelete>(discNode,discDelete);
-
-            // Delete node of linked list
-            delete prev->getData();
-            prev->removeNode();
-            prev = current;
         }
-
-        // get artist tree root
-        Node<int,Artist>* artistNode = this->artistTree.getRoot();
-
-        // create inst of artist destructor
-        ArtistPredicate artistPred;
-
-        postorder<int,Artist,ArtistPredicate>(artistNode,artistPred);
     }
     MusicManager(const MusicManager& musicManager) = delete;
     MusicManager& operator=(const MusicManager& musicManager) = delete;
 
     /*
      * Functionality:
-     * creates new artist.
-     * inserts artist into artist tree.
-     * create new disc of this artist to hold all of his song which have 0 streams. Insert songs into discs song tree.
-     * make all the songs point to the disc which hold them.
-     * If there are no songs whith 0 streams, need to create new element in rank list and insert it in the
-     * beginning of the list.
-     * else the element exists, insert disc into rank's disc tree, and update discs pointer to the adequate rank.
-     * update total number of songs in the system.
+     * Creates new artist and inserts him into artist table.
      *
      * Return values: INVALID_INPUT: in case illegal artistID\number of songs.
      *                ALLOCATION_ERROR.
-     *                FILURE: in case artist already exists.
+     *                FAILURE: in case artist already exists.
      * */
     StatusType AddArtist(int artistID, int numOfSongs){
         if(artistID<=0 || numOfSongs<=0){
@@ -107,44 +84,11 @@ public:
         try {
 
             // create artist node
-            artist = new Artist(artistID,numOfSongs);
+            artist = new Artist(artistID);
 
-            // insert into tree
-            this->artistTree.insert(artistID, artist);
+            // insert into table
+            this->artistTable->insertTable(artistID,artist);
 
-            // create new disc
-            Disc* disc = new Disc(artistID);
-
-            // update artists song
-            for(int i=0;i<artist->getNumOfSongs();i++){
-                disc->addSong((artist->getSong(i))); //Need to fix
-                artist->getSong(i)->setDisc(disc);
-            }
-
-            // insert disc into disc tree at rank 0 in bestHitsList
-
-            // if there is rank 0 at BsetHitsList
-            if(this->bestHitsListStart!= nullptr && this->bestHitsListStart->getKey()==0){
-                this->bestHitsListStart->getData()->insert(artistID,disc);
-                disc->setRankPtr(this->bestHitsListStart);
-            }
-
-            // if there isn't rank 0 at BsetHitsList - need to create one and insert it into list
-            else{
-                Node<int,Avl<int,Disc>>* rankNodeNew = new Node<int,Avl<int,Disc>>(0, new Avl<int,Disc>);
-                rankNodeNew->setPrev(nullptr);
-                rankNodeNew->setNext(this->bestHitsListStart);
-                if(this->bestHitsListStart!= nullptr) this->bestHitsListStart->setPrev(rankNodeNew);
-                this->bestHitsListStart=rankNodeNew;
-                if(this->bestHitsListFinish == nullptr) this->bestHitsListFinish=this->bestHitsListStart;
-
-                // insert disc into disc tree of newly created node in rank list, with ank 0 & update disc rank pointer
-                rankNodeNew->getData()->insert(artistID,disc);
-
-                disc->setRankPtr(rankNodeNew);
-            }
-
-            this->totalSongs+=numOfSongs;
             return SUCCESS;
         }
         catch (std::bad_alloc& e) {
@@ -156,93 +100,54 @@ public:
         }
     }
 
-    //Predicate on Song which updates each song DiscPtr to nullptr
-    class SongPredicateDestroy{
-    public:
-        void operator()(Node<int,Song>* songNode){
-            // delete artist
-            songNode->getData()->setDisc(nullptr);
-        }
-        explicit SongPredicateDestroy() = default;
-        SongPredicateDestroy(const SongPredicateDestroy& a) = delete;
-    };
-
 
     /*
      * Functionality:
-     * iterate over all artists discs once and delete them.
-     * delete all vertices from all the discs trees of the different ranks in the rank list.
-     * delete rank list element if it's empty.
-     * delete artist - artist's D'tor deletes all songs.
-     * */
+     * Remove artist from table if he has 0 songs.
+     */
     StatusType RemoveArtist(int artistID){
         if(artistID<=0) return INVALID_INPUT;
         try{
-            Artist* artist= this->artistTree.find(artistID)->getData();
-            int numOfSongs=artist->getNumOfSongs();
-            Node<int,Avl<int,Disc>>* currentNode;
+            // find artist in the table
+            Node<int,Artist>* artist= this->artistTable.getRoot.find(artistID);
 
-            // Go through all artist's songs
-            for(int i=0; i<numOfSongs; i++){
+            // check if he has any songs
+            if(artist->getData()->getSongRoot() != nullptr) return FAILURE;
 
-                Disc* disc = artist->getSong(i)->getDisc();
+            this->artistTable->deleteFromTable();
 
-                // if disc is null it's a mark we've visited & deleted this disc already
-                if(disc== nullptr) continue;
-
-                /*
-                 * iterate over all songs of this disc and make their disc pointer to point to nullptr.
-                 * we won't try to delete it second time, and we won't iterate over all of it's songs again.
-                 */
-                Node<int,Song>* songNode = disc->getSongTree()->getRoot();
-                SongPredicateDestroy songPred;
-                postorder<int,Song,SongPredicateDestroy>(songNode,songPred);
-
-                // delete disc from disc tree of adequate node
-                currentNode = disc->getRankPtr();
-                delete disc;
-                currentNode->getData()->deleteVertice(artistID);
-
-                /* check if it was the last disc in this node - if node's empty we can delete it
-                 * and update ptrs to the beginning and end of the list
-                 */
-                if(currentNode->getData()->isEmpty()){
-                    if(this->bestHitsListStart->getKey() == currentNode->getKey()){
-                        this->bestHitsListStart = currentNode->getNext();
-                    }
-                    if(this->bestHitsListFinish->getKey() == currentNode->getKey()){
-                        this->bestHitsListFinish = currentNode->getPrev();
-                    }
-                    delete currentNode->getData();
-                    currentNode->removeNode();
-                }
-
-
-            }
-            //Delete from Artist Tree
-            this->artistTree.deleteVertice(artistID);
-            delete artist;
-
-            this->totalSongs-=numOfSongs;
             return SUCCESS;
         }
-        catch(std::bad_alloc&) {
+        catch(std::bad_alloc& e) {
             return ALLOCATION_ERROR;
         }
         catch(Avl<int,Artist>::KeyNotFound&){
             return FAILURE;
         }
+    };
+
+    /* Add Song */
+    StatusType AddSong(int artistID, int songID){
+        try {
+            // find artist in table
+            Avl<int, Artist> *artistTree = this->artistTable[artistID].getRoot;
+            Artist *artist = artistTree->find(artistID)->getData();
+            Song* song = new Song(songID,artistID,0);
+            artist->addSong(songID);
+        } catch () {
+
+        }
     }
 
     /*
-     * Moves the desired song to higher rank in the BsetHitsList list.
-     * */
-    StatusType AddToSongCount(int artistID, int songID){
+     * Updates song's number of plays and update's it's rank in the bestHitsTree accordingly.
+     */
+    StatusType AddToSongCount(int artistID, int songID, int count){
         if(artistID<=0 || songID<0) return INVALID_INPUT;
         try{
-            Artist* artist=this->artistTree.find(artistID)->getData();
-            if(songID >= artist->getNumOfSongs()) return INVALID_INPUT;
-            Song* song = artist->getSong(songID);
+            // find artist in table
+            Node<int,Artist>* artistNode = this->artistTable.find(artistID)->getData();
+            Song* song = artistNode->getData()->getSong(songID);
             Disc* discOld = song->getDisc();
             Node<int,Avl<int,Disc>>* rankNodeOld = discOld->getRankPtr();
 
