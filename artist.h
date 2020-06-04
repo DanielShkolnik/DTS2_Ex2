@@ -6,46 +6,36 @@
 #define DTS2_EX1_ARTIST_H
 
 #include "node.h"
+#include "avl.h"
 #include "song.h"
-// test
+
 class Artist{
 private:
     int artistID;
-    int numOfSongs;
-    Song** songArray;
+    Song* mostPlayedSong;
+    Avl<int,Song>* bestHitsTree;
 public:
-    Artist(int artistID,int numOfSongs):artistID(artistID),numOfSongs(numOfSongs){
-        this->songArray = new Song*[numOfSongs]();
-        for (int i = 0; i < this->numOfSongs; ++i) {
-            songArray[i] = new Song(i, this->artistID);
-        }
-
+    Artist(int artistID,int numOfSongs):artistID(artistID){
+        this->bestHitsTree = new Avl<int,Song>();
+        mostPlayedSong = nullptr;
     };
     ~Artist(){
-        for (int i = 0; i < numOfSongs; ++i) {
-            delete this->songArray[i];
-        }
-        delete[] songArray;
+        delete bestHitsTree;
     };
     Artist(const Artist& artist)= delete;
     Artist& operator=(const Artist& artist)= delete;
     void addCount(int songID){
-        songArray[songID]->increasePopularity();
+        this->bestHitsTree->find(songID)->getData()->increasePopularity();
     }
     int getArtistID() const {
         return this->artistID;
     }
 
-    Song* getSong(int index){
-        return this->songArray[index];
-    }
-
-    int getNumOfSongs() const {
-        return this->numOfSongs;
+    Node<int,Song>* getSong(int songID){
+        return this->bestHitsTree->find(songID);
     }
 
     class INVALID_INPUT{};
-
 };
 
 

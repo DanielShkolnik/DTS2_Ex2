@@ -13,9 +13,8 @@ private:
     int songID;
     int artistID;
     int popularity;
-    Disc* disc;
 public:
-    Song(int songID, int artistID):songID(songID),artistID(artistID),popularity(0),disc(nullptr){};
+    Song(int songID, int artistID, int popularity):songID(songID),artistID(artistID),popularity(popularity){};
     ~Song() = default;
     Song(const Song& song) = delete;
     Song& operator=(const Song& song) = delete;
@@ -29,18 +28,9 @@ public:
         this->popularity++;
     }
 
-    void setDisc(Disc* discToSet){
-        this->disc=discToSet;
-    }
-
-    Disc* getDisc(){
-        return this->disc;
-    }
-
     int getPopularity() const {
         return this->popularity;
     }
-
 
 };
 #endif //DTS2_EX1_SONG_H
