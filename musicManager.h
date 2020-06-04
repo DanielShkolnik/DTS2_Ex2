@@ -11,18 +11,18 @@
 #include "song.h"
 #include "exception"
 #include "library2.h"
-#include "key.h"
+#include "keyBestHitsTree.h"
 #include <iostream>
 
 class MusicManager{
 private:
-Avl<int,Song>* songTree;
+Avl<int,Song>* bestHitsTree;
 Hash<int,AVL<int,Artist>>* artistTable;
 
 public:
     MusicManager(){
         // init hash table of size 2 in O(1)
-        this->songTree = new Avl<int,Song>();
+        this->bestHitsTree = new Avl<int,Song>();
     }
 
     /* Function used by MusicManager destructor to iterate over disc tree and delete all of it's nodes */
@@ -84,7 +84,7 @@ public:
         try {
 
             // create artist node
-            artist = new Artist(artistID);
+            Artist* artist = new Artist(artistID);
 
             // insert into table
             this->artistTable->insertTable(artistID,artist);
@@ -133,7 +133,20 @@ public:
             Avl<int, Artist> *artistTree = this->artistTable[artistID].getRoot;
             Artist *artist = artistTree->find(artistID)->getData();
             Song* song = new Song(songID,artistID,0);
-            artist->addSong(songID);
+            artist->addSong(song);
+        } catch () {
+
+        }
+    }
+
+    /* Remove Song - Dont forget to delete data */
+    StatusType RemoveSong(int artistID, int songID){
+        try {
+            // find artist in table
+            Avl<int, Artist> *artistTree = this->artistTable[artistID].getRoot;
+            Artist *artist = artistTree->find(artistID)->getData();
+            Song* song = new Song(songID,artistID,0);
+            artist->addSong(song);
         } catch () {
 
         }

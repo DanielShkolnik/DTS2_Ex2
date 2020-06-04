@@ -14,7 +14,7 @@ private:
     int artistID;
     int popularity;
 public:
-    Song(int songID, int artistID, int popularity):songID(songID),artistID(artistID),popularity(popularity){};
+    Song(int songID, int artistID):songID(songID),artistID(artistID),popularity(0){};
     ~Song() = default;
     Song(const Song& song) = delete;
     Song& operator=(const Song& song) = delete;
@@ -24,8 +24,8 @@ public:
     int getArtistID(){
         return this->artistID;
     }
-    void increasePopularity(){
-        this->popularity++;
+    void increasePopularity(int count){
+        this->popularity+=count;
     }
     int getPopularity() const {
         return this->popularity;
