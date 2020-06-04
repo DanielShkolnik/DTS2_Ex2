@@ -109,6 +109,7 @@ int main(int argc, const char**argv) {
     else std::cout << "Unable to open file";
     fclose (stdout);
     return 0;
+
 }
 
 /***************************************************************************/
