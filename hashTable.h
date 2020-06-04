@@ -25,12 +25,7 @@ private:
     friend class ArtistPredicate;
 
 public:
-    explicit HashTable(){
-        this->arr = new Avl<int,Artist>*[MAGIC_SIZE]();
-        initArr(this->arr,MAGIC_SIZE);
-        this->numOfUsedCells = 0;
-        this->arrSize = MAGIC_SIZE;
-    };
+    explicit HashTable();
     ~HashTable();
     HashTable(const HashTable&) = delete;
     HashTable& operator=(const HashTable&) = delete;
@@ -105,6 +100,13 @@ void HashTable::decreaseSize(){
 int HashTable::hash(int artistID, int arrSize){
     return artistID%arrSize;
 }
+
+HashTable::HashTable(){
+    this->arr = new Avl<int,Artist>*[MAGIC_SIZE]();
+    initArr(this->arr,MAGIC_SIZE);
+    this->numOfUsedCells = 0;
+    this->arrSize = MAGIC_SIZE;
+};
 
 HashTable::~HashTable(){
     this->deleteArr();
