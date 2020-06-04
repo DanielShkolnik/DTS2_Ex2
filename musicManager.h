@@ -333,27 +333,13 @@ public:
 
 
 
-    StatusType GetRecommendedSongInPlace(int rank, int *artists, int *songs){
+    StatusType GetRecommendedSongInPlace(int rank, int *artistID, int *songID){
         if(rank <= 0) return INVALID_INPUT;
-        if(numOfSongs > this->totalSongs) return FAILURE;
+        if(this->totalSongs<rank) return FAILURE;
         try {
-            int i = 0, j=numOfSongs;
-            int *counter = &j;
-            int *index = &i;
-            // set iterator to end of list & init counter
-            Node<int, Avl<int, Disc>> *iter = this->bestHitsListFinish;
+            Node<int,Song>* current = this->bestHitsTree->getRoot();
 
-            // loop over nodes of list
-            for (; (iter != nullptr && *counter > 0); iter = iter->getPrev()) {
 
-                // get disc root
-                Node<int, Disc> *discIter = iter->getData()->getRoot();
-
-                // create inst of predicate for disc
-                DiscPredicate discPred(artists, counter, index, songs);
-
-                // traverse tree for current rank
-                inorder<int, Disc, DiscPredicate>(discIter, discPred);
             }
             return SUCCESS;
         }

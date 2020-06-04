@@ -121,6 +121,14 @@ public:
         }
         delete this;
     }
+
+    int getRank() const{
+        return this->rank;
+    }
+    void setRank(int rank){
+        this->rank = rank;
+    }
+
 };
 
 
