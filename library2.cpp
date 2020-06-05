@@ -50,3 +50,27 @@ void Quit(void** DS){
     delete *(MusicManager **)DS;
     *DS = nullptr;
 };
+
+/*
+class NodePredicate{
+public:
+    void operator()(Node<KeyBestHitsTree,Song>* node){
+        std::cout << "(" <<node->getData()->getArtistID() << "," << node->getData()->getSongID() << "," << node->getData()->getPopularity() << ")  ";
+    }
+    explicit NodePredicate() = default;
+    NodePredicate(const NodePredicate& a) = delete;
+};
+
+
+
+
+void printBestHits(void *DS){
+
+    Node<KeyBestHitsTree,Song>* node = ((MusicManager*)DS)->bestHitsTree->getRoot();
+
+    NodePredicate nodePredicate;
+
+    inorder<KeyBestHitsTree,Song,NodePredicate>(node,nodePredicate);
+    std::cout << std::endl;
+};
+*/

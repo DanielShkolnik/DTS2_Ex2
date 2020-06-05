@@ -47,6 +47,10 @@ StatusType GetRecommendedSongInPlace(void *DS, int rank, int *artistId, int *son
 
 void Quit(void** DS);
 
+
+void printBestHits(void *DS);
+
+
 #ifdef __cplusplus
 }
 #endif

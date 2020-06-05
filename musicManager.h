@@ -305,11 +305,11 @@ public:
                     *songID=current->getData()->getSongID();
                     return SUCCESS;
                 }
-                else if(current->getRight()->getRank()>k-1){
+                else if(rightSonRank>k-1){
                     current=current->getRight();
                 }
-                else if(current->getRight()->getRank()<k-1){
-                    k = k-current->getRight()->getRank()-1;
+                else if(rightSonRank<k-1){
+                    k = k-rightSonRank-1;
                     current=current->getLeft();
                 }
 

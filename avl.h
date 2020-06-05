@@ -179,15 +179,11 @@ void Avl<K,D>::insert(const K& key, D* data){
     this->fixBalanceFactor(newNode);
     this->updateRoot(newNode);
 }
-void updateRank(){
-
-}
 
 template <class K, class D>
 void Avl<K,D>::fixBalanceFactor(Node<K,D>* vertice){
     if(vertice->isLeaf()){
         vertice->calcHeight();
-        // update vertice rank
         vertice->updateRank();
         vertice = vertice->getParent();
         updateRoot(vertice);
@@ -197,7 +193,7 @@ void Avl<K,D>::fixBalanceFactor(Node<K,D>* vertice){
     while(vertice){
 
         // save old height and calc new height. If height hasn't changed - the tree is balanced
-        int oldHeight = vertice->getHeight();
+        //int oldHeight = vertice->getHeight();
 
         // update vertice height
         vertice->calcHeight();
@@ -209,9 +205,9 @@ void Avl<K,D>::fixBalanceFactor(Node<K,D>* vertice){
         int currentBF = this->getBF(vertice);
 
         // If current vertice height hasn't changed due to rotations and parent BF is legal - tree is balanced
-        if(oldHeight == vertice->getHeight() && currentBF < 2 && currentBF > -2){
-            return;
-        }
+        //if(oldHeight == vertice->getHeight() && currentBF < 2 && currentBF > -2){
+        //    return;
+        //}
 
         //LL
         if(currentBF == 2 && this->getBF(vertice->getLeft())>=0){

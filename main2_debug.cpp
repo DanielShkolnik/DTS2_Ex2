@@ -89,17 +89,19 @@ static bool isInit = false;
 /* main                                                                    */
 /***************************************************************************/
 
+int i = 1;
+
 int main(int argc, const char**argv) {
 
     std::string line;
     std::ifstream myfile ("ingeneral2.txt");
-    freopen ("ingeneral2_Out_Our.txt","w",stdout);
-    int i = 1;
+    freopen ("ingeneral2_Out_Our_Debug.txt","w",stdout);
+    //int i = 1;
     if (myfile.is_open())
     {
         while ( getline (myfile,line) )
         {
-            if(i==95){
+            if(i==12){
                 int j=0;
             }
             //std::cout << std::endl;
@@ -156,13 +158,18 @@ static errorType OnQuit(void** DS, const char* const command);
 /* Parser                                                                  */
 /***************************************************************************/
 
+
 static errorType parser(const char* const command) {
     static void *DS = NULL; /* The general data structure */
     const char* command_args = NULL;
     errorType rtn_val = error;
 
     commandType command_val = CheckCommand(command, &command_args);
-	
+
+    if(i==86){
+        //printBestHits(DS);
+    }
+
     switch (command_val) {
 
         case (INIT_CMD):
