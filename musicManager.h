@@ -10,7 +10,7 @@
 #include "artist.h"
 #include "song.h"
 #include "exception"
-#include "library2.h"
+//#include "library2.h"
 #include "keyBestHitsTree.h"
 #include "hashtable.h"
 #include <iostream>
@@ -282,7 +282,6 @@ public:
     /*
      * Use Select(k) algorithm as seen in the tutorial in order to find the song in rank "rank".
      */
-    // need to check
     StatusType GetRecommendedSongInPlace(int rank, int *artistID, int *songID){
         if(rank <= 0 || artistID == nullptr || songID == nullptr) return INVALID_INPUT;
         if(this->totalSongs<rank) return FAILURE;
@@ -290,17 +289,17 @@ public:
             Node<KeyBestHitsTree,Song>* current = this->bestHitsTree->getRoot();
             int k=rank;
             while(current!= nullptr){
-                if(current->getLeft() != nullptr && current->getLeft()->getRank()==k-1) {
+                if(current->getRight()->getRank()==k-1) {
                     *artistID=current->getData()->getArtistID();
                     *songID=current->getData()->getSongID();
                     return SUCCESS;
                 }
-                else if(current->getLeft() != nullptr && current->getLeft()->getRank()>k-1){
-                    current=current->getLeft();
-                }
-                else if(current->getRight() != nullptr && current->getLeft()->getRank()<k-1){
+                else if(current->getRight()->getRank()>k-1){
                     current=current->getRight();
-                    k = k-current->getLeft()->getRank()-1;
+                }
+                else if(current->getRight()->getRank()<k-1){
+                    current=current->getLeft();
+                    k = k-current->getRight()->getRank()-1;
                 }
             }
 
