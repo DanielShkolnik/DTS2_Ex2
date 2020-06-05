@@ -168,7 +168,6 @@ void Avl<K,D>::insert(const K& key, D* data){
     } catch(const Avl<K,D>::KeyExists&) {
         throw Avl<K, D>::KeyExists();
     }
-    IncreaseRank();
 
     Node<K,D>* newNode = new Node<K,D>(key,data,nearest);
     if(nearest == nullptr){
