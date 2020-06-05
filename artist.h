@@ -61,22 +61,27 @@ public:
         this->songTreeByID->insert(song->getSongID(),song);
         KeyPopulartiyID key = KeyPopulartiyID(song->getSongID(),song->getPopularity());
         this->songTreeByPlays->insert(key,song);
-        KeyPopulartiyID keyMostPlayedSong = KeyPopulartiyID(this->mostPlayedSong->getSongID(),this->mostPlayedSong->getPopularity());
-        if(key > keyMostPlayedSong){
-            this->mostPlayedSong = song;
+        if(this->mostPlayedSong!= nullptr){
+            KeyPopulartiyID keyMostPlayedSong = KeyPopulartiyID(this->mostPlayedSong->getSongID(),this->mostPlayedSong->getPopularity());
+            if(key > keyMostPlayedSong){
+                this->mostPlayedSong = song;
+            }
         }
+        else this->mostPlayedSong = song;
+
     }
 
     //Remember not Delete song before this function
     void removeSong(int songID){
-        // Dont forget to update mostPopular!
         Song* song = this->getSongByID(songID)->getData();
         this->songTreeByID->deleteVertice(song->getSongID());
         KeyPopulartiyID key = KeyPopulartiyID(song->getSongID(),song->getPopularity());
         this->songTreeByPlays->deleteVertice(key);
         KeyPopulartiyID keyMostPlayedSong = KeyPopulartiyID(this->mostPlayedSong->getSongID(),this->mostPlayedSong->getPopularity());
         if(key == keyMostPlayedSong){
-            this->mostPlayedSong = this->songTreeByPlays->getMaxNode()->getData();
+            Node<KeyPopulartiyID,Song>* bestSongNode = this->songTreeByPlays->getMaxNode();
+            if(bestSongNode != nullptr) this->mostPlayedSong = bestSongNode->getData();
+            else this->mostPlayedSong = nullptr;
         }
     }
 

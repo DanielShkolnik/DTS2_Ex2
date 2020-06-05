@@ -14,7 +14,6 @@
 #ifndef _234218_WET1
 #define _234218_WET1
 
-#include "musicManager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,46 +31,21 @@ typedef enum {
 
 void *Init();
 
-StatusType AddArtist(void *DS, int artistID){
-    if(DS == nullptr) {return INVALID_INPUT;}
-    return ((MusicManager*)DS)->AddArtist(artistID);
+StatusType AddArtist(void *DS, int artistID);
 
-};
+StatusType RemoveArtist(void *DS, int artistID);
 
-StatusType RemoveArtist(void *DS, int artistID){
-    if(DS == nullptr) return INVALID_INPUT;
-    return ((MusicManager*)DS)->RemoveArtist(artistID);
-};
+StatusType AddSong(void *DS, int artistID, int songID);
 
-StatusType AddSong(void *DS, int artistID, int songID){
-    if(DS == nullptr) return INVALID_INPUT;
-    return ((MusicManager*)DS)->AddSong(artistID,songID);
-};
+StatusType RemoveSong(void *DS, int artistID, int songID);
 
-StatusType RemoveSong(void *DS, int artistID, int songID){
-    if(DS == nullptr) return INVALID_INPUT;
-    return ((MusicManager*)DS)->RemoveSong(artistID,songID);
-};
+StatusType AddToSongCount(void *DS, int artistID, int songID, int count);
 
-StatusType AddToSongCount(void *DS, int artistID, int songID, int count){
-    if(DS == nullptr) return INVALID_INPUT;
-    return ((MusicManager*)DS)->AddToSongCount(artistID,songID,count);
-};
+StatusType GetArtistBestSong(void *DS, int artistID, int *songId);
 
-StatusType GetArtistBestSong(void *DS, int artistID, int *songId){
-    if(DS == nullptr) return INVALID_INPUT;
-    return ((MusicManager*)DS)->GetArtistBestSong(artistID,songId);
-};
+StatusType GetRecommendedSongInPlace(void *DS, int rank, int *artistId, int *songId);
 
-StatusType GetRecommendedSongInPlace(void *DS, int rank, int *artistId, int *songId){
-    if(DS == nullptr) return INVALID_INPUT;
-    return ((MusicManager*)DS)->GetRecommendedSongInPlace(rank,artistId,songId)
-};
-
-void Quit(void** DS){
-    delete *(MusicManager **)DS;
-    *DS = nullptr;
-};
+void Quit(void** DS);
 
 #ifdef __cplusplus
 }

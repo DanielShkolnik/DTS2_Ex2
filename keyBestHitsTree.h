@@ -24,11 +24,11 @@ public:
             return true;
         }
         else if(this->numOfPlays == other.numOfPlays){
-            if (this->artistID > other.artistID) {
+            if (this->artistID < other.artistID) {
                 return true;
             }
             else if (this->artistID == other.artistID) {
-                if (this->songID > other.songID) {
+                if (this->songID < other.songID) {
                     return true;
                 }
             }

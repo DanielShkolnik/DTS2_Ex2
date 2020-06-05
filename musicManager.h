@@ -10,10 +10,11 @@
 #include "artist.h"
 #include "song.h"
 #include "exception"
-//#include "library2.h"
+#include "library2.h"
 #include "keyBestHitsTree.h"
-#include "hashtable.h"
+#include "hashTable.h"
 #include <iostream>
+
 
 class MusicManager{
 private:
@@ -66,6 +67,7 @@ public:
             postorder<int,Artist,ArtistPredicate>(artistNode,artistPredicate);
         }
         delete bestHitsTree;
+        // this->artistHashTable.~HashTable();
     }
     MusicManager(const MusicManager& musicManager) = delete;
     MusicManager& operator=(const MusicManager& musicManager) = delete;
@@ -79,13 +81,11 @@ public:
      *                FAILURE: in case artist already exists.
      * */
     StatusType AddArtist(int artistID){
-        if(artistID<=0){
-            return INVALID_INPUT;
-        }
+        if(artistID<=0) return INVALID_INPUT;
         Artist* artist;
         try {
             // create artist node
-            Artist* artist = new Artist(artistID);
+            artist = new Artist(artistID);
 
             // insert into table
             this->artistHashTable.addArtist(artist);
@@ -117,6 +117,7 @@ public:
 
             // delete artist from table
             this->artistHashTable.removeArtist(artistID);
+            delete artist;
 
             return SUCCESS;
         }
@@ -130,7 +131,7 @@ public:
 
     /* Add Song - insert song into adequate artist's song tree */
     StatusType AddSong(int artistID, int songID){
-        if(artistID<=0 || songID<=0) { return INVALID_INPUT; }
+        if(artistID<=0 || songID<=0) return INVALID_INPUT;
         Song* song;
         try {
             // find artist in table
@@ -146,7 +147,7 @@ public:
             KeyBestHitsTree key = KeyBestHitsTree(songID,artistID,0);
 
             // add song to bestHitsTree
-            bestHitsTree->insert(key,song);
+            this->bestHitsTree->insert(key,song);
 
             // update total number of songs stored in the system
             this->totalSongs++;
@@ -178,7 +179,7 @@ public:
 
     /* Remove song from artist song tree */
     StatusType RemoveSong(int artistID, int songID){
-        if(artistID<=0 || songID<=0) { return INVALID_INPUT; }
+        if(artistID<=0 || songID<=0) return INVALID_INPUT;
         try {
             // find artist in table
             Artist *artist = this->artistHashTable.findArtist(artistID);
@@ -186,6 +187,13 @@ public:
             Song* song = artist->getSongByID(songID)->getData();
             // artist deletes the adequate node which holds the song we need to delete
             artist->removeSong(songID);
+
+            // create bestHitsTree key
+            KeyBestHitsTree key = KeyBestHitsTree(songID,artistID,song->getPopularity());
+
+            // delete song from tree
+            this->bestHitsTree->deleteVertice(key);
+
             delete song;
             // update total number of songs stored in the system
             this->totalSongs--;
@@ -264,7 +272,7 @@ public:
             Artist* artist= this->artistHashTable.findArtist(artistID);
 
             // artist has no songs
-            if(artist->getRootInSongTreeByID() == nullptr) return FAILURE;
+            if(artist->getMostPlayed() == nullptr) return FAILURE;
 
             // get number of streams of the most popular song
             *songID = artist->getMostPlayed()->getSongID();
@@ -288,8 +296,11 @@ public:
         try {
             Node<KeyBestHitsTree,Song>* current = this->bestHitsTree->getRoot();
             int k=rank;
+            int rightSonRank;
             while(current!= nullptr){
-                if(current->getRight()->getRank()==k-1) {
+                if(current->getRight()!= nullptr) rightSonRank = current->getRight()->getRank();
+                else rightSonRank=0;
+                if(current->isLeaf() || rightSonRank==k-1) {
                     *artistID=current->getData()->getArtistID();
                     *songID=current->getData()->getSongID();
                     return SUCCESS;
@@ -298,9 +309,10 @@ public:
                     current=current->getRight();
                 }
                 else if(current->getRight()->getRank()<k-1){
-                    current=current->getLeft();
                     k = k-current->getRight()->getRank()-1;
+                    current=current->getLeft();
                 }
+
             }
 
             return SUCCESS;

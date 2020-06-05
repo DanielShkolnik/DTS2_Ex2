@@ -18,7 +18,7 @@
 class HashTable{
 private:
     Avl<int,Artist>** arr;
-    int numOfUsedCells;
+    int numOfElements;
     int arrSize;
 
     void initArr(Avl<int,Artist>** array, int size);
@@ -102,6 +102,7 @@ void HashTable::increaseSize(){
 
     /* Delete old table */
     this->deleteArr();
+    delete[] this->arr;
 
     /* Update new table parameters */
     this->arrSize = newSize;
@@ -129,6 +130,7 @@ void HashTable::decreaseSize(){
 
     /* Delete old table */
     this->deleteArr();
+    delete[] this->arr;
 
     /* Update new table parameters */
     this->arrSize = newSize;
@@ -142,13 +144,13 @@ int HashTable::hash(int artistID, int arrSize){
 HashTable::HashTable(){
     this->arr = new Avl<int,Artist>*[MAGIC_SIZE]();
     initArr(this->arr,MAGIC_SIZE);
-    this->numOfUsedCells = 0;
+    this->numOfElements = 0;
     this->arrSize = MAGIC_SIZE;
 };
 
 HashTable::~HashTable(){
     this->deleteArr();
-    delete this->arr;
+    delete[] this->arr;
 }
 
 /*
@@ -156,6 +158,12 @@ HashTable::~HashTable(){
  * Insert new artist into the tree at the adequate index of the hash table.
  */
 void HashTable::addArtist(Artist* artist){
+
+    // In case the table is full - double it's size
+    if(this->numOfElements == this->arrSize){
+        increaseSize();
+    }
+
     // using hash table find adequate index of the artist
     int index = HashTable::hash(artist->getArtistID(),this->arrSize);
 
@@ -163,12 +171,7 @@ void HashTable::addArtist(Artist* artist){
     this->arr[index]->insert(artist->getArtistID(),artist);
 
     // increase capacitance
-    this->numOfUsedCells++;
-
-    // In case the table is full - double it's size
-    if(this->numOfUsedCells == this->arrSize){
-        increaseSize();
-    }
+    this->numOfElements++;
 };
 
 /*
@@ -179,7 +182,7 @@ void HashTable::removeArtist(int artistID){
     /* Check if only quarter of the table is at use. If so, decrease table size to half it's size
      * Else, Do nothing.
      */
-    if(this->numOfUsedCells == this->arrSize/4 && this->arrSize > MAGIC_SIZE){
+    if(this->numOfElements == this->arrSize/4 && this->arrSize > MAGIC_SIZE){
         this->decreaseSize();
     }
 

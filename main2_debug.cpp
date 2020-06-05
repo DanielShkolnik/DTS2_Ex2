@@ -17,7 +17,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "library2.h"
+
+#include <iostream>
+#include <fstream>
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,14 +92,14 @@ static bool isInit = false;
 int main(int argc, const char**argv) {
 
     std::string line;
-    std::ifstream myfile ("in14.txt");
-    freopen ("out14_our.txt","w",stdout);
+    std::ifstream myfile ("ingeneral2.txt");
+    freopen ("ingeneral2_Out_Our.txt","w",stdout);
     int i = 1;
     if (myfile.is_open())
     {
         while ( getline (myfile,line) )
         {
-            if(i==57){
+            if(i==95){
                 int j=0;
             }
             //std::cout << std::endl;
