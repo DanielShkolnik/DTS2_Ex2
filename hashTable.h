@@ -18,6 +18,10 @@
 class HashTable{
 private:
     Avl<int,Artist>** arr;
+    /* Number of artists currently stored in the hash table.
+     * this will be used to calculate whether to increase or decrease the table's size.
+     * maintains the load factor constant.
+     */
     int numOfElements;
     int arrSize;
 
