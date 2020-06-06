@@ -57,7 +57,7 @@ public:
 
     class SongPredicate{
     public:
-        void operator()(Node<int,Song>* songNode){
+        void operator()(Node<KeyBestHitsTree,Song>* songNode){
             // delete song
             delete songNode->getData();
         }
