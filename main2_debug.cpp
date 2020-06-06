@@ -95,7 +95,7 @@ int main(int argc, const char**argv) {
 
     std::string line;
     std::ifstream myfile ("ingeneral2.txt");
-    freopen ("ingeneral2_Out_Our_Debug.txt","w",stdout);
+    freopen ("ingeneral2_Out_Our.txt","w",stdout);
     //int i = 1;
     if (myfile.is_open())
     {

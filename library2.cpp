@@ -51,6 +51,7 @@ void Quit(void** DS){
     *DS = nullptr;
 };
 
+//For debug functions:
 /*
 class NodePredicate{
 public:
@@ -60,8 +61,6 @@ public:
     explicit NodePredicate() = default;
     NodePredicate(const NodePredicate& a) = delete;
 };
-
-
 
 
 void printBestHits(void *DS){
