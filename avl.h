@@ -192,9 +192,6 @@ void Avl<K,D>::fixBalanceFactor(Node<K,D>* vertice){
 
     while(vertice){
 
-        // save old height and calc new height. If height hasn't changed - the tree is balanced
-        //int oldHeight = vertice->getHeight();
-
         // update vertice height
         vertice->calcHeight();
 
@@ -203,11 +200,6 @@ void Avl<K,D>::fixBalanceFactor(Node<K,D>* vertice){
 
         // get vertice BF
         int currentBF = this->getBF(vertice);
-
-        // If current vertice height hasn't changed due to rotations and parent BF is legal - tree is balanced
-        //if(oldHeight == vertice->getHeight() && currentBF < 2 && currentBF > -2){
-        //    return;
-        //}
 
         //LL
         if(currentBF == 2 && this->getBF(vertice->getLeft())>=0){
