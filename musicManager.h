@@ -27,7 +27,7 @@ public:
     MusicManager(): bestHitsTree(new Avl<KeyBestHitsTree,Song>), artistHashTable(), totalSongs(0) {};
 
     /* Function used by MusicManager destructor to iterate over song tree and delete all of the data stored in the nodes */
-    class SongPredicate{
+    /*class SongPredicate{
     public:
         void operator()(Node<int,Song>* songNode){
             // delete song
@@ -35,10 +35,10 @@ public:
         }
         explicit SongPredicate() = default;
         SongPredicate(const SongPredicate& a) = delete;
-    };
+    }; */
 
-    /* Function used by MusicManager destructor to iterate over artist tree and delete all of the songs  */
-    class ArtistPredicate{
+    /*Function used by MusicManager destructor to iterate over artist tree and delete all of the songs  */
+    /*class ArtistPredicate{
     public:
         void operator()(Node<int,Artist>* artistNode){
             // get the root of song tree of the current artist
@@ -53,8 +53,27 @@ public:
         }
         explicit ArtistPredicate() = default;
         ArtistPredicate(const ArtistPredicate& a) = delete;
+    };*/
+
+    class SongPredicate{
+    public:
+        void operator()(Node<int,Song>* songNode){
+            // delete song
+            delete songNode->getData();
+        }
+        explicit SongPredicate() = default;
+        SongPredicate(const SongPredicate& a) = delete;
     };
 
+    /* Function used by MusicManager destructor to iterate over artist tree and delete all of the songs  */
+    class ArtistPredicate{
+    public:
+        void operator()(Node<int,Artist>* artistNode){
+            delete artistNode->getData();
+        }
+        explicit ArtistPredicate() = default;
+        ArtistPredicate(const ArtistPredicate& a) = delete;
+    };
     ~MusicManager(){
         /* For each artist in the Hash table, iterate over it's songs tree, and delete all the song from the tree nodes */
         for(int i = 0; i<artistHashTable.getTableSize(); i++){
@@ -66,6 +85,16 @@ public:
 
             postorder<int,Artist,ArtistPredicate>(artistNode,artistPredicate);
         }
+
+        // get the root of song tree of the current artist
+        Node<KeyBestHitsTree,Song>* songNode = bestHitsTree->getRoot();
+
+        // do postorder to free data (song) in each node
+        SongPredicate songDelete;
+
+        /* do postorder on song tree and delete it's data (songs) */
+        postorder<KeyBestHitsTree,Song,SongPredicate>(songNode,songDelete);
+
         delete bestHitsTree;
         // this->artistHashTable.~HashTable();
     }
@@ -115,8 +144,10 @@ public:
             // check if he has any songs
             if(artist->getRootInSongTreeByID() != nullptr) return FAILURE;
 
-            // delete artist from table
+            // delete artist node from the tree table
             this->artistHashTable.removeArtist(artistID);
+
+            // delete artist
             delete artist;
 
             return SUCCESS;
