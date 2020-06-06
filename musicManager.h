@@ -27,34 +27,6 @@ public:
     MusicManager(): bestHitsTree(new Avl<KeyBestHitsTree,Song>), artistHashTable(), totalSongs(0) {};
 
     /* Function used by MusicManager destructor to iterate over song tree and delete all of the data stored in the nodes */
-    /*class SongPredicate{
-    public:
-        void operator()(Node<int,Song>* songNode){
-            // delete song
-            delete songNode->getData();
-        }
-        explicit SongPredicate() = default;
-        SongPredicate(const SongPredicate& a) = delete;
-    }; */
-
-    /*Function used by MusicManager destructor to iterate over artist tree and delete all of the songs  */
-    /*class ArtistPredicate{
-    public:
-        void operator()(Node<int,Artist>* artistNode){
-            // get the root of song tree of the current artist
-            Node<int,Song>* songNode = artistNode->getData()->getRootInSongTreeByID();
-
-            // do postorder to free data (song) in each node
-            SongPredicate songDelete;
-
-            postorder<int,Song,SongPredicate>(songNode,songDelete);
-
-            delete artistNode->getData();
-        }
-        explicit ArtistPredicate() = default;
-        ArtistPredicate(const ArtistPredicate& a) = delete;
-    };*/
-
     class SongPredicate{
     public:
         void operator()(Node<KeyBestHitsTree,Song>* songNode){
